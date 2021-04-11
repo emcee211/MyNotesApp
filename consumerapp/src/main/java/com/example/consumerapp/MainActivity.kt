@@ -1,4 +1,4 @@
-package com.example.mynotesapp
+package com.example.consumerapp
 
 import android.content.Intent
 import android.database.ContentObserver
@@ -8,11 +8,11 @@ import android.os.HandlerThread
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.mynotesapp.adapter.NoteAdapter
-import com.example.mynotesapp.databinding.ActivityMainBinding
-import com.example.mynotesapp.db.DatabaseContract.NoteColumns.Companion.CONTENT_URI
-import com.example.mynotesapp.entity.Note
-import com.example.mynotesapp.helper.MappingHelper
+import com.example.consumerapp.adapter.NoteAdapter
+import com.example.consumerapp.databinding.ActivityMainBinding
+import com.example.consumerapp.db.DatabaseContract.NoteColumns.Companion.CONTENT_URI
+import com.example.consumerapp.entity.Note
+import com.example.consumerapp.helper.MappingHelper
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = "Notes"
+        supportActionBar?.title = "Consumer Notes"
 
         binding.rvNotes.layoutManager = LinearLayoutManager(this)
         binding.rvNotes.setHasFixedSize(true)
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         handlerThread.start()
         val handler = Handler(handlerThread.looper)
 
-        val myObserver = object : ContentObserver(handler) {
+        val myObserver = object : ContentObserver(handler){
             override fun onChange(selfChange: Boolean) {
                 loadNotesAsync()
             }
@@ -73,12 +73,12 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             binding.progressbar.visibility = View.VISIBLE
             val deferredNotes = async(Dispatchers.IO) {
-//                val cursor = noteHelper.queryAll()
+                // CONTENT_URI = content://com.dicoding.picodiploma.mynotesapp/note
                 val cursor = contentResolver.query(CONTENT_URI, null, null, null, null)
                 MappingHelper.mapCursorToArrayList(cursor)
             }
-            binding.progressbar.visibility = View.INVISIBLE
             val notes = deferredNotes.await()
+            binding.progressbar.visibility = View.INVISIBLE
             if (notes.size > 0) {
                 adapter.listNotes = notes
             } else {
